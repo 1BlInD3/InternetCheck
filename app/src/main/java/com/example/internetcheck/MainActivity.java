@@ -57,11 +57,12 @@ public class MainActivity extends AppCompatActivity {
     private WifiManager wifiManager;
     private List<ScanResult> scan;
     private String time;
-    private String time2;
+    private int time2;
     private String name = "DOGGER.txt";
     private NetworkChangeReceiver nr = new NetworkChangeReceiver();
     private static final int REQUEST_STORAGE = 112;
     private boolean first = true;
+    private  Process p;
     private Date date;
     private String res = "";
 
@@ -97,17 +98,16 @@ public class MainActivity extends AppCompatActivity {
 
         handler = new Handler();
 
-
+        wifiManager= (WifiManager)getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         final Runnable r = new Runnable() {
             public void run() {
-
                // CheckConnection(URL);
                 CheckWifi();
                 getMac();
                 //executeCommand();
-                executeCmd("ping -c 1 -s 128 10.0.0.11",false);
+                executeCmd("ping -c 1 -s 128 8.8.8.8",false);
                // Logger(macAddress+"\t"+time+"\t"+"\n");
-                handler.postDelayed(this, 2000);
+                handler.postDelayed(this, 5000);
             }
         };
 
@@ -150,12 +150,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void CheckWifi()
     {
-        wifiManager= (WifiManager)getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         int number = 5;
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
         scan = wifiManager.getScanResults();
         int level = WifiManager.calculateSignalLevel(wifiInfo.getRssi(), number);
-        wifiStrength.setText("A Wifi erőssége = "+String.valueOf(level)+"\n");
+        wifiStrength.setText("A Wifi erőssége = "+String.valueOf(wifiInfo.getRssi()+"dBm")+"\n");
 
     }
 
@@ -169,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
             WifiManager wifimanage = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
             WifiInfo wifiinfo = wifimanage.getConnectionInfo();
             macAddress = wifiinfo.getBSSID();//Get the mac address of the currently connected network;
-            wifiStrength.append("\t"+macAddress);
+            wifiStrength.append("\t"+macAddress+ "\t");
 
         }
         return macAddress;
@@ -196,43 +195,76 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public String executeCmd(String cmd, boolean sudo){
-        try {
+        if(wifiManager.isWifiEnabled()) {
+            Log.d("PING","WIFI");
+            try {
+                Log.d("PING","TRY");
+                if (!sudo)
+                    p = Runtime.getRuntime().exec(cmd);
+                else {
+                    p = Runtime.getRuntime().exec(new String[]{"su", "-c", cmd});
+                }
+                BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
 
-            Process p;
-            if(!sudo)
-                p= Runtime.getRuntime().exec(cmd);
-            else{
-                p= Runtime.getRuntime().exec(new String[]{"su", "-c", cmd});
-            }
-            BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                String s;
+                while ((s = stdInput.readLine()) != null) {
+                    res += s + "\n";
+                }
+                p.waitFor();
+                if(p.exitValue()==0) {
+                    p.destroy();
+                    Log.d("PING","IF");
+                    try {
+                        int a = res.indexOf("received");
+                        time = res.substring(a - 2, a + 8);
+                        Log.d("FUTYUL", String.valueOf(time));
+                    } catch (Exception e) {
+                        time = "0ms";
+                    }
+                    //time2 = res.substring(245,260);
+                    // char a = res.charAt(96);
+                    //wifiStrength.append("\t"+time);
+                    pingTime.setText("Sikeres csomag fogadás");
+                    successRow++;
+                    successfulConnection.setText(String.valueOf(successRow));
+                    date = new Date();
+                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    Logger(time + "\t" + " | " + "\t" + String.valueOf(format.format(date) + "\n"));
+                    return res;
+                }
+                else
+                {
+                    Log.d("PING","ELSE");
+                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    Logger("Nem jó érték" + "\t" + " | " + "\t" + String.valueOf(format.format(date) + "\n"));
+                    p.destroy();
+                    failedRow++;
+                    failedConnection.setText(String.valueOf(failedRow));
+                    pingTime.setText("Nem 0- process kód");
+                    return "catch";
+                }
 
-            String s;
-            while ((s = stdInput.readLine()) != null) {
-                res += s + "\n";
+
+            } catch (Exception e) {
+                p.destroy();
+                Log.d("PING","CATCH");
+                Logger("ELDOBTAM ______________________________" + res);
+                e.printStackTrace();
+                failedRow++;
+                failedConnection.setText(String.valueOf(failedRow));
+                pingTime.setText("Sikertelen fogadás");
+                return "catch";
             }
-            time = res.substring(167,177);
-            int a = res.indexOf("time=");
-            time2 = res.substring(245,260);
-           // char a = res.charAt(96);
-            Log.d("FUTYUL", String.valueOf(a));
-            p.destroy();
-            Log.d("CSENG",res+"\n");
-            //wifiStrength.append("\t"+time);
-            pingTime.setText(time);
-            successRow ++;
-            successfulConnection.setText(String.valueOf(successRow));
-            date = new Date();
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            Logger(time +"\t"+" | "+"\t" + String.valueOf(format.format(date)+"\n"));
-            return res;
-        } catch (Exception e) {
-            Logger("ELDOBTAM ______________________________"+res);
-            e.printStackTrace();
-            failedRow ++;
-            failedConnection.setText(String.valueOf(failedRow));
-            pingTime.setText("0");
         }
-        return "";
+        else
+        {
+            Log.d("PING","NINCS_WIFI");
+            failedRow++;
+            failedConnection.setText(String.valueOf(failedRow));
+            pingTime.setText("Nincs Wifi");
+            Logger("NEM VOLT WIFI");
+            return "catch";
+        }
 
     }
 
