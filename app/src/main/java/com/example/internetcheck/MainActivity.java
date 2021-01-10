@@ -20,6 +20,7 @@ import android.os.StrictMode;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import net.sourceforge.jtds.jdbc.DateTime;
 
@@ -47,21 +48,13 @@ public class MainActivity extends AppCompatActivity {
     private int successRow = 0;
     private int failedRow = 0;
     private TextView wifiStrength;
-    private TextView wifiStrengthClassification;
     private TextView pingTime;
     private Handler handler;
     private String macAddress;
     private File file;
-    private String URL = "jdbc:jtds:sqlserver://10.0.0.11;databaseName=Fusetech;user=scala_read;password=scala_read;loginTimeout=5";
-    private Connection connection;
     private WifiManager wifiManager;
     private List<ScanResult> scan;
     private String time;
-    private int time2;
-    private String name = "DOGGER.txt";
-    private NetworkChangeReceiver nr = new NetworkChangeReceiver();
-    private static final int REQUEST_STORAGE = 112;
-    private boolean first = true;
     private  Process p;
     private Date date;
     private String res = "";
@@ -84,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         successfulConnection = (TextView)findViewById(R.id.textView2);
         failedConnection = (TextView)findViewById(R.id.textView4);
         wifiStrength = (TextView)findViewById(R.id.textView26);
-        wifiStrengthClassification = (TextView)findViewById(R.id.textView27);
+        TextView wifiStrengthClassification = (TextView) findViewById(R.id.textView27);
         pingTime = (TextView)findViewById(R.id.textView28);
 
 
@@ -116,12 +109,13 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
-    private boolean CheckConnection(String connString)
+    private boolean CheckConnection()
     {
         try {
 
             Class.forName("net.sourceforge.jtds.jdbc.Driver");
-            connection = DriverManager.getConnection(URL);
+            String URL = "jdbc:jtds:sqlserver://10.0.0.11;databaseName=Fusetech;user=scala_read;password=scala_read;loginTimeout=5";
+            Connection connection = DriverManager.getConnection(URL);
             if(connection != null)
             {
                 Log.d("DONKEY","Csatlakozva");
@@ -153,8 +147,8 @@ public class MainActivity extends AppCompatActivity {
         int number = 5;
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
         scan = wifiManager.getScanResults();
-        int level = WifiManager.calculateSignalLevel(wifiInfo.getRssi(), number);
-        wifiStrength.setText("A Wifi erőssége = "+String.valueOf(wifiInfo.getRssi()+"dBm")+"\n");
+        //int level = WifiManager.calculateSignalLevel(wifiInfo.getRssi(), number);
+        wifiStrength.setText("A Wifi erőssége = "+wifiInfo.getRssi()+"dBm"+"\n");
 
     }
 
@@ -194,6 +188,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     public String executeCmd(String cmd, boolean sudo){
         if(wifiManager.isWifiEnabled()) {
             Log.d("PING","WIFI");
@@ -217,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         int a = res.indexOf("received");
                         time = res.substring(a - 2, a + 8);
-                        Log.d("FUTYUL", String.valueOf(time));
+                        Log.d("FUTYUL", time);
                     } catch (Exception e) {
                         time = "0ms";
                     }
@@ -228,14 +223,14 @@ public class MainActivity extends AppCompatActivity {
                     successRow++;
                     successfulConnection.setText(String.valueOf(successRow));
                     date = new Date();
-                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     Logger(time + "\t" + " | " + "\t" + String.valueOf(format.format(date) + "\n"));
                     return res;
                 }
                 else
                 {
                     Log.d("PING","ELSE");
-                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     Logger("Nem jó érték" + "\t" + " | " + "\t" + String.valueOf(format.format(date) + "\n"));
                     p.destroy();
                     failedRow++;
@@ -281,7 +276,7 @@ public class MainActivity extends AppCompatActivity {
                 stream.close();
                 Log.d("IRAS", "Becsukta");
             } catch (Exception e) {
-
+                Toast.makeText(this, "ROSSZ", Toast.LENGTH_SHORT).show();
             }
 
         }
