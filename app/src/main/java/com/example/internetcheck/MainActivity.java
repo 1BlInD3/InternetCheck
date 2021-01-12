@@ -18,7 +18,12 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.StrictMode;
 import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,6 +44,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.SimpleFormatter;
 
@@ -61,21 +69,22 @@ public class MainActivity extends AppCompatActivity {
     private String res = "";
     private ArrayList<String> result;
     private Integer decibel;
-
+    private String server_value="";
+    private String package_size;
+    private String interval_value;
+    private int interval_ms;
+    private int clicked = 0;
+    private Runnable r;
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
-
-
 
         successfulConnection = (TextView)findViewById(R.id.textView2);
         failedConnection = (TextView)findViewById(R.id.textView4);
@@ -93,24 +102,115 @@ public class MainActivity extends AppCompatActivity {
                 "\n" +
                 "2-Weak < -70 dBm\n"+"\n");
 
-        handler = new Handler();
 
+        Spinner server = (Spinner)findViewById(R.id.spinner1);
+        Spinner packages = (Spinner)findViewById(R.id.spinner2);
+        Spinner interval = (Spinner)findViewById(R.id.spinner3);
+        Button startBtn = (Button)findViewById(R.id.startBtn);
+       // packages.setEnabled(false);
+       // interval.setEnabled(false);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,R.array.servers,android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        server.setAdapter(adapter);
 
-        final Runnable r = new Runnable() {
-            public void run() {
-                time = "";
-                time2 = "";
-                res = "";
-               // CheckConnection(URL);
-                CheckWifi();
-                getMac();
-                //executeCommand();
-                executeCmd("ping -c 1 -s 128 10.0.0.11",false);
-                handler.postDelayed(this, 1000);
+        ArrayAdapter adapter1 = ArrayAdapter.createFromResource(this,R.array.packages,android.R.layout.simple_spinner_item);
+        adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        packages.setAdapter(adapter1);
+
+        ArrayAdapter adapter2 = ArrayAdapter.createFromResource(this,R.array.seconds,android.R.layout.simple_spinner_item);
+        adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        interval.setAdapter(adapter2);
+
+        server.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                server_value = parent.getItemAtPosition(position).toString();
             }
-        };
 
-        handler.postDelayed(r, 2000);
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        packages.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+               package_size = parent.getItemAtPosition(position).toString();
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        interval.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                interval_value = parent.getItemAtPosition(position).toString();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+
+        startBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (clicked == 0) {
+                    String command = "ping -c " + package_size + " -s 128 " + server_value;
+
+                    successfulConnection.setText("");
+                    successRow=0;
+                    failedConnection.setText("");
+                    failedRow =0;
+                    wifiStrength.setText("");
+                    pingTime.setText("");
+
+                    Log.d("FIDGET", command);
+                    interval_ms = Integer.valueOf(interval_value) * 1000;
+                    Log.d("FIDGET", String.valueOf(interval_ms));
+                    handler = new Handler();
+
+                     r = new Runnable() {
+                        public void run() {
+                            time = "";
+                            time2 = "";
+                            res = "";
+                            // CheckConnection(URL);
+                            CheckWifi();
+                            getMac();
+                            //executeCommand();
+                            // executeCmd("ping -c 1 -s 128 10.0.0.11",false);
+                            executeCmd(command, false);
+                            handler.postDelayed(this, interval_ms);
+                        }
+                    };
+
+                    handler.postDelayed(r, 2000);
+                    startBtn.setText("STOP");
+                    clicked++;
+                   // longRunningTaskFuture = executorService.submit(r);
+
+                }
+                else if(clicked > 0)
+                {
+
+                    Toast.makeText(getApplicationContext(),"futok",Toast.LENGTH_SHORT).show();
+                    clicked = 0;
+                    startBtn.setText("START");
+                    //longRunningTaskFuture.cancel(true);
+                    handler.removeCallbacks(r);
+                }
+
+            }
+        });
+
+
 
     }
     private boolean CheckConnection()
@@ -325,6 +425,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 

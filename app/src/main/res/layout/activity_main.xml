@@ -18,29 +18,55 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+
+            <Button
+                android:id="@+id/startBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginStart="59dp"
+                android:layout_marginEnd="59dp"
+                android:layout_marginTop="110dp"
+                android:text="START" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Szerver:"
+                android:textSize="18sp"/>
+            <Spinner
+                android:id="@+id/spinner1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="70dp"/>
+
             <TextView
                 android:id="@+id/textView28"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignBottom="@+id/textView1"
-                android:layout_marginBottom="-167dp"
+                android:layout_marginBottom="-171dp"
                 android:text="Ide jön a cucc"
                 android:textAlignment="center" />
 
             <TextView
                 android:id="@+id/textView1"
                 android:layout_width="match_parent"
+                android:layout_marginTop="170dp"
                 android:layout_height="wrap_content"
+                android:paddingBottom="15dp"
                 android:text="Sikeres csatlakozások"
                 android:textAlignment="center"
-                android:textSize="18dp"
-                android:paddingBottom="15dp" />
+                android:textSize="18sp" />
+
             <TextView
                 android:id="@+id/textView2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Ide jön a cucc"
                 android:layout_alignBottom="@+id/textView1"
+                android:layout_marginBottom="-39dp"
+                android:text="Ide jön a cucc"
                 android:textAlignment="center" />
 
             <TextView
@@ -48,7 +74,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignBottom="@+id/textView1"
-                android:layout_marginBottom="-43dp"
+                android:layout_marginBottom="-97dp"
                 android:text="Ide jön a cucc"
                 android:textAlignment="center" />
 
@@ -66,14 +92,44 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <Spinner
+                android:id="@+id/spinner2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="30dp"
+                android:layout_marginEnd="27dp" />
+
+            <Spinner
+                android:id="@+id/spinner3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="100dp"
+                android:layout_marginEnd="25dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Csomag:"
+                android:textSize="18sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="70dp"
+                android:text="Gyakoriság (sec)"
+                android:textSize="18sp" />
+
             <TextView
                 android:id="@+id/textView3"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="170dp"
+                android:paddingBottom="15dp"
                 android:text="Sikertelen csatlakozások"
                 android:textAlignment="center"
-                android:textSize="18dp"
-                android:paddingBottom="15dp" />
+                android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/textView4"
@@ -87,7 +143,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignBottom="@+id/textView3"
-                android:layout_marginBottom="-161dp"
+                android:layout_marginBottom="-169dp"
                 android:text="Ide jön a cucc"
                 android:textAlignment="center" />
 
