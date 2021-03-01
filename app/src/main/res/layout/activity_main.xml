@@ -78,6 +78,43 @@
                 android:text="Ide jön a cucc"
                 android:textAlignment="center" />
 
+            <Button
+                android:id="@+id/GPS"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textView28"
+                android:layout_marginTop="300dp"
+                android:layout_marginLeft="59dp"
+                android:text="GPS mérés" />
+
+            <CheckBox
+                android:id="@+id/checkBox"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textView28"
+                android:layout_marginTop="250dp"
+                android:text="Pontos mérés" />
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/GPS"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="10dp"
+                android:text="Felvett pontok:" />
+
+            <TextView
+                android:id="@+id/textView666"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/GPS"
+                android:layout_marginTop="45dp"
+                android:layout_marginStart="10dp"
+                android:text="0" />
+
+
+
         </RelativeLayout>
 
     </LinearLayout>
