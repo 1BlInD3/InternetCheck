@@ -1,7 +1,5 @@
 <resources>
     <string name="app_name">InternetCheck</string>
-    
-
 
     <string-array name="packages">
         <item>1</item>

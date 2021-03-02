@@ -81,6 +81,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        getSupportActionBar().hide();
+
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -199,8 +201,6 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else if(clicked > 0)
                 {
-
-                    Toast.makeText(getApplicationContext(),"futok",Toast.LENGTH_SHORT).show();
                     clicked = 0;
                     startBtn.setText("START");
                     //longRunningTaskFuture.cancel(true);
@@ -319,7 +319,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     try {
                         int b = res.indexOf("time=");
-                        time2 = res.substring(b,b+12);
+                        time2 = res.substring(b+5,b+9).trim();
                         Log.d("FUTYUL", time2);
                     }catch (Exception asd)
                     {
@@ -341,15 +341,15 @@ public class MainActivity extends AppCompatActivity {
                         time = res.substring(a - 2, a + 8);
                         //Log.d("FUTYUL", time);
                     } catch (Exception ex) {
-                        time = "0ms";
+                        time = "0";
                     }
                     try {
                         int b = res.indexOf("time=");
-                        time2 = res.substring(b,b+12);
-                        //Log.d("IDO", time2);
+                        time2 = res.substring(b+5,b+9).trim();
+                        Log.d("IDO", time2);
                     }catch (Exception asd)
                     {
-                        time2 = "0ms";
+                        time2 = "0";
                     }
                     Log.d("PING","ELSE");
                     date = new Date();
@@ -358,7 +358,7 @@ public class MainActivity extends AppCompatActivity {
                     p.destroy();
                     failedRow++;
                     failedConnection.setText(String.valueOf(failedRow));
-                    pingTime.setText(pingTime +" _Nem 0 process kód");
+                    pingTime.setText(time2+" _Nem 0 process kód");
                     return "catch";
                 }
 
@@ -370,15 +370,15 @@ public class MainActivity extends AppCompatActivity {
                     time = res.substring(a - 2, a + 8);
                     Log.d("FUTYUL", time);
                 } catch (Exception exec) {
-                    time = "0ms";
+                    time = "0";
                 }
                 try {
                     int b = res.indexOf("time=");
-                    time2 = res.substring(b,b+12);
+                    time2 = res.substring(b+5,b+9).trim();
                     Log.d("IDO", time2);
                 }catch (Exception asd)
                 {
-                    time2 = "0ms";
+                    time2 = "0";
                 }
                 Log.d("PING","CATCH");
                 date = new Date();
@@ -414,6 +414,11 @@ public class MainActivity extends AppCompatActivity {
         {
             try {
                 FileOutputStream stream = new FileOutputStream(file,true);
+                if(file.length()==0)
+                {
+                    String a = "Csomagok;MacAddress;Ido;PingTime;Decibel;Hibakod\n";
+                    stream.write(a.getBytes());
+                }
                 stream.write(data.getBytes());
                 stream.close();
                 Log.d("IRAS", "Becsukta");
