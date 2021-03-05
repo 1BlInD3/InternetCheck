@@ -9,7 +9,6 @@ import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -32,12 +31,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
@@ -45,37 +41,21 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.maps.android.PolyUtil;
 import com.google.maps.android.heatmaps.WeightedLatLng;
 
-import net.sourceforge.jtds.jdbc.DateTime;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.ResourceBundle;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.SimpleFormatter;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -114,6 +94,9 @@ public class MainActivity extends AppCompatActivity {
     private CheckBox accuratePosition;
     private TextView text666;
     private int y = 0;
+    private ArrayList<WeightedLatLng> points = new ArrayList<>();
+    private ArrayList<LatLng> coords = new ArrayList<>();
+    private ArrayList<Integer> classification = new ArrayList<>();
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -131,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
                 lat.clear();
                 lon.clear();
                 dec.clear();
+                points.clear();
                 y = 0;
                 text666.setText(String.valueOf(y));
                 clicked2++;
@@ -143,6 +127,15 @@ public class MainActivity extends AppCompatActivity {
                 if(lat.size()>0) {
                     Logger(lat, lon, dec);
                     generateKml(lat, lon, dec);
+                    generateWeight(lat, lon, classification);
+                    coords(lat,lon);
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable("COORDINATES",points);
+                    bundle.putSerializable("Coord",coords);
+                    bundle.putSerializable("dec",dec);
+                    MapsFragment mapsFragment = new MapsFragment();
+                    mapsFragment.setArguments(bundle);
+                    getSupportFragmentManager().beginTransaction().replace(R.id.frame_container,mapsFragment,"MAP").addToBackStack("MAP").commit();
                 }
                 else
                 {
@@ -393,6 +386,26 @@ public class MainActivity extends AppCompatActivity {
         try {
             WifiInfo wifiInfo = wifiManager.getConnectionInfo();
             scan = wifiManager.getScanResults();
+            if(wifiInfo.getRssi()>-50)
+            {
+                classification.add(5);
+            }
+            else if(wifiInfo.getRssi()<-50 && wifiInfo.getRssi()>-60)
+            {
+                classification.add(4);
+            }
+            else if(wifiInfo.getRssi()<-60 && wifiInfo.getRssi()>-70)
+            {
+                classification.add(3);
+            }
+            else if(wifiInfo.getRssi()<-70 && wifiInfo.getRssi()>-80)
+            {
+                classification.add(2);
+            }
+            else
+            {
+                classification.add(1);
+            }
             dec.add(String.valueOf(wifiInfo.getRssi()));
         }catch(Exception e)
         {
@@ -576,6 +589,27 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    private void generateWeight(ArrayList<Double> lat, ArrayList<Double> lon, ArrayList<Integer> decibel)
+    {
+        WeightedLatLng weightedLatLng;
+        for (int i = 0; i< lat.size(); i++)
+        {
+            weightedLatLng = new WeightedLatLng(new LatLng(lat.get(i),lon.get(i)),Double.valueOf(decibel.get(i)));
+            points.add(weightedLatLng);
+        }
+    }
+
+    private void coords(ArrayList<Double> lat, ArrayList<Double> lon)
+    {
+        LatLng latLng;
+        for (int i = 0; i< lat.size(); i++)
+        {
+            latLng = new LatLng(lat.get(i),lon.get(i));
+            coords.add(latLng);
+        }
+    }
+
 
     private void generateKml(ArrayList<Double> lat, ArrayList<Double> lon, ArrayList<String> decibel)
     {
